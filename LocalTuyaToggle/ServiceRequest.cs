@@ -23,7 +23,8 @@ namespace LocalTuyaToggle
 		public async Task<string> RequestService(string value)
 		{
 			var timestamp = Helper.TimeStamp;
-			var message = _clientId + _token + timestamp + GetStringToSign(value);
+			var command = "{'commands':[{ 'code': 'switch_led', 'value': " + value + " }]}";
+			var message = _clientId + _token + timestamp + GetStringToSign(command);
 			var sign = Helper.Encrypt(message, _secret);
 
 			HttpResponseMessage response;
@@ -36,9 +37,7 @@ namespace LocalTuyaToggle
 					request.Headers.TryAddWithoutValidation("sign", sign);
 					request.Headers.TryAddWithoutValidation("t", timestamp);
 					request.Headers.TryAddWithoutValidation("sign_method", "HMAC-SHA256");
-
-
-					request.Content = new StringContent("{'commands':[{ 'code': 'switch_led', 'value': " + value + " }]}");
+					request.Content = new StringContent(command);
 					request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
 					response = await httpClient.SendAsync(request);
@@ -47,34 +46,10 @@ namespace LocalTuyaToggle
 			return await response.Content.ReadAsStringAsync();
 		}
 
-		private RestRequest CreateRequest(string sign, string timestamp, string value)
-		{
-			var request = new RestRequest();
-			request.Method = Method.Post;
-			request.AddHeader("client_id", _clientId);
-			request.AddHeader("access_token", _token);
-			request.AddHeader("sign", sign);
-			request.AddHeader("t", timestamp);
-			request.AddHeader("sign_method", "HMAC-SHA256");
-			request.AddHeader("Content-Type", "application/json");
-			var body = "{'commands':[{ 'code': 'switch_led', 'value': true }]}";
-			request.AddParameter("application/json", body, ParameterType.RequestBody);
-			return request;
-		}
-
-		private string GetStringToSign(string value)
+		private string GetStringToSign(string command)
 		{
 			var httpMethod = "POST";
-			string contentSHA256;
-			if (value == "true")
-			{
-				contentSHA256 = "9dc6865aa51302096e552fc45997d7e613b26919b6e566e12d52a9bf79b4164f";
-
-			}
-			else
-			{
-				contentSHA256 = "ccada8f71c88db6c7abb3f892c35153c8a11a9239418be258e6cfa689d83186b";
-			}
+			string contentSHA256 = Helper.Sha256(command);
 			var url = $"/v1.0/devices/{_deviceId}/commands";
 			var stringToSign = httpMethod + "\n" +
 							   contentSHA256 + "\n" +

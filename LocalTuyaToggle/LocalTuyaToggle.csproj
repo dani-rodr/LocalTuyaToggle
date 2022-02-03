@@ -69,6 +69,7 @@
     <Compile Include="Message.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ServiceRequest.cs" />
+    <Compile Include="ServiceRequestStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

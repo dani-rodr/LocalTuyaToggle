@@ -36,6 +36,10 @@ namespace LocalTuyaToggle
             {
                 Console.WriteLine($"{response.msg}");
             }
+
+            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
+            await deviceStatusRequest.RequestService();
+
         }
         public async override void OnClick()
         {

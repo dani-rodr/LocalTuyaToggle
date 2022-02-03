@@ -1,6 +1,7 @@
 ﻿
 using System;
-
+using System.Text.Json;
+using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -24,23 +25,31 @@ namespace LocalTuyaToggle
         public async override void OnStartListening()
         {
             base.OnStartListening();
-            Console.WriteLine("Start Listening");
+            var tile = QsTile;
+            if (!string.IsNullOrEmpty(_token))
+            {
+                await SetTileState();
+                return;
+            }
             var tokenRequest = new TokenRequest(_clientId, _secret);
             var response = await tokenRequest.RequestToken();
-            if (response.success)
+            if (!response.success)
             {
-                _token = response.result.access_token;
-                Console.WriteLine($"Token is {response.result.access_token}");
-            }
-            else
-            {
+                tile.State = TileState.Unavailable;
+                tile.UpdateTile();
                 Console.WriteLine($"{response.msg}");
+                return;
             }
-
-            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
-            await deviceStatusRequest.RequestService();
-
+            _token = response.result.access_token;
+            await SetTileState();
         }
+
+        public async override void OnStopListening()
+        {
+            base.OnStopListening();
+            await SetTileState();
+        }
+
         public async override void OnClick()
         {
             base.OnClick();
@@ -57,6 +66,26 @@ namespace LocalTuyaToggle
                 tile.State = TileState.Active;
             }
             tile.UpdateTile();
+        }
+
+        private async Task SetTileState()
+        {
+            var tile = QsTile;
+            var isDeviceOn = await IsDeviceOn();
+            tile.State = (isDeviceOn) ? TileState.Active : TileState.Inactive;
+            tile.UpdateTile();
+        }
+
+        private async Task<bool> IsDeviceOn()
+        {
+            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
+            var status = await deviceStatusRequest.RequestDeviceStatus();
+            if (!status.success)
+            {
+                return false;
+            }
+            var isOn = (JsonElement) status.result[0].value;
+            return isOn.GetBoolean();
         }
     }
 

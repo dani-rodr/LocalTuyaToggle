@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+
 namespace LocalTuyaToggle
 {
     public class Result
@@ -14,6 +15,19 @@ namespace LocalTuyaToggle
         public int code { get; set; }
         public string msg { get; set; }
         public Result result { get; set; }
+        public bool success { get; set; }
+        public long t { get; set; }
+    }
+
+    public class KeyValuePair
+    {
+        public string code { get; set; }
+        public object value { get; set; }
+    }
+
+    public class DeviceStatus
+    {
+        public List<KeyValuePair> result { get; set; }
         public bool success { get; set; }
         public long t { get; set; }
     }

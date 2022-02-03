@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
+using RestSharp;
 
 namespace LocalTuyaToggle
 {
@@ -18,31 +20,28 @@ namespace LocalTuyaToggle
 			_token = token;
 		}
 
-		public async Task<string> RequestService()
+		public async Task<DeviceStatus> RequestDeviceStatus()
 		{
 			var timestamp = Helper.TimeStamp;
-			//var command = "{'commands':[{ 'code': 'switch_led', 'value': " + value + " }]}";
-			var command = "";
-			var message = _clientId + _token + timestamp + GetStringToSign(command);
+			var message = _clientId + _token + timestamp + GetStringToSign("");
 			var sign = Helper.Encrypt(message, _secret);
+			var request = CreateRequest(sign, timestamp);
+			var client = new RestClient("https://openapi.tuyaus.com/v1.0/devices/82315003c44f33f81519/status");
+			var response = await client.ExecuteAsync(request);
 
-			HttpResponseMessage response;
-			using (var httpClient = new HttpClient())
-			{
-				using (var request = new HttpRequestMessage(new HttpMethod("GET"), "https://openapi.tuyaus.com/v1.0/devices/82315003c44f33f81519/status"))
-				{
-					request.Headers.TryAddWithoutValidation("client_id", _clientId);
-					request.Headers.TryAddWithoutValidation("access_token", _token);
-					request.Headers.TryAddWithoutValidation("sign", sign);
-					request.Headers.TryAddWithoutValidation("t", timestamp);
-					request.Headers.TryAddWithoutValidation("sign_method", "HMAC-SHA256");
+			return await JsonSerializer.DeserializeAsync<DeviceStatus>(response.Content.ToStream());
+		}
 
-					response = await httpClient.SendAsync(request);
-				}
-			}
-			var result = await response.Content.ReadAsStringAsync();
-			Console.WriteLine(result);
-			return result;
+		private RestRequest CreateRequest(string sign, string timestamp)
+		{
+			var request = new RestRequest();
+			request.AddHeader("client_id", _clientId);
+			request.AddHeader("access_token", _token);
+			request.AddHeader("sign", sign);
+			request.AddHeader("t", timestamp);
+			request.AddHeader("sign_method", "HMAC-SHA256");
+
+			return request;
 		}
 
 		private string GetStringToSign(string command)

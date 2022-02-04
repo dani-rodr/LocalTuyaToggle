@@ -8,27 +8,12 @@ namespace LocalTuyaToggle
     [Service(Name = "com.LocalTuyaToggle.ToggleService",
              Permission = Android.Manifest.Permission.BindQuickSettingsTile,
              Label = "Lights",
-             Icon = "@mipmap/light_toggle")]
+             Icon = "@mipmap/ic_launcher")]
     [IntentFilter(new[] { ActionQsTile })]
     public class ToggleService : TileService
     {
         private DeviceController _deviceController = new DeviceController();
-        //Called each time tile is visible
-        public async override void OnStartListening()
-        {
-            base.OnStartListening();
-            var state = QsTile.State;
-            var isDeviceActive = await IsActiveAsync();
 
-            if (isDeviceActive && state != TileState.Active)
-            {
-                ActivateTile();
-            }
-            else if (!isDeviceActive && state != TileState.Inactive)
-            {
-                DeactivateTile();
-            }
-        }
         public async override void OnClick()
         {
             base.OnClick();

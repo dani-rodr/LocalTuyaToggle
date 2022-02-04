@@ -12,6 +12,7 @@ namespace LocalTuyaToggle
         private const string _expKey = "expiration";
         private const string _accessTokenKey = "access_token";
         private string _token = string.Empty;
+        private long _expiration = 0;
 
         private readonly StatusRequest _statusRequest;
         private readonly CommandRequest _commandRequest;
@@ -26,52 +27,49 @@ namespace LocalTuyaToggle
 
         public async Task<bool> IsActiveAsync()
         {
-            await RetrieveToken();
-            return await _statusRequest.IsActiveAsync(_token);
+            var token = await RetrieveTokenAsync();
+            return await _statusRequest.IsActiveAsync(token);
         }
 
         public async Task<bool> TurnOnAsync()
         {
-            await RetrieveToken();
-            return await _commandRequest.TurnOnAsync(_token);
+            var token = await RetrieveTokenAsync();
+            return await _commandRequest.TurnOnAsync(token);
         }
 
         public async Task<bool> TurnOffAsync()
         {
-            await RetrieveToken();
-            return await _commandRequest.TurnOffAsync(_token);
+            var token = await RetrieveTokenAsync();
+            return await _commandRequest.TurnOffAsync(token);
         }
 
-        private async Task RetrieveToken()
+        private async Task<string> RetrieveTokenAsync()
         {
-            if (!string.IsNullOrEmpty(_token))
+            var shouldGetFromStorage = _expiration == 0 || string.IsNullOrEmpty(_token);
+            if (shouldGetFromStorage)
             {
-                return;
+                _expiration = Convert.ToInt64(await SecureStorage.GetAsync(_expKey));
+                _token = await SecureStorage.GetAsync(_accessTokenKey);
+            }
+            if (_expiration > Helper.TimeStamp)
+            {
+                return _token;
             }
 
-            if (await IsTokenExpired())
-            {
-                await RequestToken();
-            }
-
-            _token = await SecureStorage.GetAsync(_accessTokenKey);
+            return await RequestTokenAsync();
         }
 
-        private async Task RequestToken()
+        private async Task<string> RequestTokenAsync()
         {
             var tokenResponse = await _tokenRequest.GetToken();
             var result = tokenResponse.result;
-            var expiration = Convert.ToInt64(tokenResponse.t) + Convert.ToInt64(result.expire_time) * 1000;
-            _token = result.access_token;
-            await SecureStorage.SetAsync(_accessTokenKey, _token);
-            await SecureStorage.SetAsync(_expKey, expiration.ToString());
-        }
 
-        private async Task<bool> IsTokenExpired()
-        {
-            var expirationString = await SecureStorage.GetAsync(_expKey);
-            var expiration = Convert.ToInt64(expirationString);
-            return (Helper.TimeStamp > expiration);
+            var _expiration = Convert.ToInt64(tokenResponse.t) + Convert.ToInt64(result.expire_time) * 1000;
+            var _token = result.access_token;
+
+            await SecureStorage.SetAsync(_accessTokenKey, _token);
+            await SecureStorage.SetAsync(_expKey, _expiration.ToString());
+            return _token;
         }
     }
 }

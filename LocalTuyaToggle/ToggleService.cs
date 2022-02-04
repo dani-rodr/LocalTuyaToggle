@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
+using Android.Graphics.Drawables;
 using Android.Service.QuickSettings;
 
 namespace LocalTuyaToggle
@@ -23,7 +24,7 @@ namespace LocalTuyaToggle
                 await TurnOffDeviceAsync();
                 return;
             }
-            else if (state == TileState.Inactive)
+            if (state == TileState.Inactive)
             {
                 await TurnOnDeviceAsync();
                 return;
@@ -32,7 +33,7 @@ namespace LocalTuyaToggle
 
         private async Task TurnOffDeviceAsync()
         {
-            SetSubtitleTurningOff();
+            SetSubtitle("Turning off");
             var success = await _deviceController.TurnOffAsync();
             if (success)
             {
@@ -46,7 +47,7 @@ namespace LocalTuyaToggle
 
         private async Task TurnOnDeviceAsync()
         {
-            SetSubtitleTurningOn();
+            SetSubtitle("Turning on");
             var success = await _deviceController.TurnOnAsync();
             if (success)
             {
@@ -74,30 +75,11 @@ namespace LocalTuyaToggle
             tile.UpdateTile();
         }
 
-        private void SetSubtitle(string str = "")
+        private void SetSubtitle(string str)
         {
             var tile = QsTile;
             tile.Subtitle = str;
             tile.UpdateTile();
-        }
-
-        private void SetSubtitleTurningOn()
-        {
-            SetSubtitle("Turning on");
-        }
-
-        private void SetSubtitleTurningOff()
-        {
-            SetSubtitle("Turning off");
-        }
-
-        private async Task<bool> IsActiveAsync()
-        {
-            SetSubtitle("Connecting..");
-            var isActive = await _deviceController.IsActiveAsync();
-            var subtitle = (isActive) ? "On" : "Off";
-            SetSubtitle(subtitle);
-            return isActive;
         }
     }
 

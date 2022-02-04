@@ -42,7 +42,7 @@ namespace LocalTuyaToggle
             }
         }
 
-        public static string TimeStamp { get; } = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString();
+        public static long TimeStamp { get; } = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         public static Stream ToStream(this string value) => new MemoryStream((Encoding.UTF8).GetBytes(value ?? string.Empty));
     }
 }

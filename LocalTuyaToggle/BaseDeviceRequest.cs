@@ -32,7 +32,7 @@ namespace LocalTuyaToggle
 
 		private RestRequest CreateRequest(string body, string token)
 		{
-			var timestamp = Helper.TimeStamp;
+			var timestamp = Helper.TimeStamp.ToString();
 			var sign = CreateSign(body, timestamp, token);
 
             var request = new RestRequest

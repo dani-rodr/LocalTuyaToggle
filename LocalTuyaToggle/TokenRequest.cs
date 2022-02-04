@@ -11,16 +11,10 @@ namespace LocalTuyaToggle
 		{
 		}
 
-		public async Task<string> GetToken()
+		public async Task<TokenResponse> GetToken()
         {
 			var response = await RequestCommandAsync<TokenResponse>();
-			if (!response.success)
-            {
-				Console.WriteLine($"Failed Token Request msg:{response.msg}");
-				return "";
-            }
-
-			return response.result.access_token;
+			return response;
         }
 
 		protected override void FillRequestHeader(RestRequest request, string body, string timestamp, string sign, string token)

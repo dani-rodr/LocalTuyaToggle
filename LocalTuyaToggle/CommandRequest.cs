@@ -4,9 +4,9 @@ using RestSharp;
 
 namespace LocalTuyaToggle
 {
-    public class ServiceRequest : BaseDeviceRequest
+    public class CommandRequest : BaseDeviceRequest
 	{
-		public ServiceRequest(string clientId, string secret, string token, string deviceId)
+		public CommandRequest(string clientId, string secret, string token, string deviceId)
 							: base(clientId, secret, token, Method.Post, $"/v1.0/devices/{deviceId}/commands")
 		{
 		}

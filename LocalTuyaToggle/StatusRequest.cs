@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace LocalTuyaToggle
 {
-    public class ServiceRequestStatus : BaseDeviceRequest
+    public class StatusRequest : BaseDeviceRequest
 	{
-		public ServiceRequestStatus(string clientId, string secret, string token, string deviceId)
+		public StatusRequest(string clientId, string secret, string token, string deviceId)
 								: base(clientId, secret, token, Method.Get, $"/v1.0/devices/{deviceId}/status")
 		{
 		}

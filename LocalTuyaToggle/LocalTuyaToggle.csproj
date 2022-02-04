@@ -67,7 +67,7 @@
     <Compile Include="ToggleService.cs" />
     <Compile Include="TokenRequest.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="ServiceRequest.cs" />
+    <Compile Include="CommandRequest.cs" />
     <Compile Include="ServiceRequestStatus.cs" />
     <Compile Include="BaseDeviceRequest.cs" />
   </ItemGroup>

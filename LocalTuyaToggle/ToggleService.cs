@@ -1,10 +1,8 @@
 ﻿
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
-using Android.OS;
 using Android.Service.QuickSettings;
 
 namespace LocalTuyaToggle
@@ -33,7 +31,7 @@ namespace LocalTuyaToggle
         private async Task SetTileCurrentState()
         {
             var tile = QsTile;
-            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
+            var deviceStatusRequest = new StatusRequest(_clientId, _secret, _token, _deviceId);
             var isOn = await deviceStatusRequest.IsOnAsync();
             if (isOn && tile.State != TileState.Active)
             {
@@ -50,7 +48,7 @@ namespace LocalTuyaToggle
         {
             base.OnClick();
             var tile = QsTile;
-            var serviceRequest = new ServiceRequest(_clientId, _secret, _token, _deviceId);
+            var serviceRequest = new CommandRequest(_clientId, _secret, _token, _deviceId);
             if (tile.State == TileState.Active)
             {
                 var success = await serviceRequest.TurnOffAsnyc();
@@ -72,7 +70,7 @@ namespace LocalTuyaToggle
 
         private async Task<bool> IsDeviceOn()
         {
-            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
+            var deviceStatusRequest = new StatusRequest(_clientId, _secret, _token, _deviceId);
             return await deviceStatusRequest.IsOnAsync();
         }
     }

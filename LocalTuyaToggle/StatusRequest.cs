@@ -13,9 +13,9 @@ namespace LocalTuyaToggle
 		{
 		}
 
-		public async Task<bool> IsOnAsync(string token)
+		public async Task<bool> IsActiveAsync(string token)
 		{
-			var response = await RequestCommandAsync<StatusResponse>(token: token);
+			var response = await SendRequest<StatusResponse>(token: token);
 			if (!response.success)
             {
 				return false;

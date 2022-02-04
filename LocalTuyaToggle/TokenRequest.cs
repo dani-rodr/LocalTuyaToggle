@@ -13,7 +13,7 @@ namespace LocalTuyaToggle
 
 		public async Task<TokenResponse> GetToken()
         {
-			var response = await RequestCommandAsync<TokenResponse>();
+			var response = await SendRequest<TokenResponse>();
 			return response;
         }
 

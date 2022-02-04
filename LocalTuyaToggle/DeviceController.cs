@@ -15,17 +15,19 @@ namespace LocalTuyaToggle
 
         private readonly StatusRequest _statusRequest;
         private readonly CommandRequest _commandRequest;
+        private readonly TokenRequest _tokenRequest;
 
         public DeviceController()
         {
             _statusRequest = new StatusRequest(_clientId, _secret, _deviceId);
             _commandRequest = new CommandRequest(_clientId, _secret, _deviceId);
+            _tokenRequest = new TokenRequest(_clientId, _secret);
         }
 
         public async Task<bool> IsActiveAsync()
         {
             await RetrieveToken();
-            return await _statusRequest.IsOnAsync(_token);
+            return await _statusRequest.IsActiveAsync(_token);
         }
 
         public async Task<bool> TurnOnAsync()
@@ -57,8 +59,7 @@ namespace LocalTuyaToggle
 
         private async Task RequestToken()
         {
-            var tokenRequest = new TokenRequest(_clientId, _secret);
-            var tokenResponse = await tokenRequest.GetToken();
+            var tokenResponse = await _tokenRequest.GetToken();
             var result = tokenResponse.result;
             var expiration = Convert.ToInt64(tokenResponse.t) + Convert.ToInt64(result.expire_time) * 1000;
             _token = result.access_token;

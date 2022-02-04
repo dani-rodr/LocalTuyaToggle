@@ -20,7 +20,7 @@ namespace LocalTuyaToggle
 			_resource = resource;
 		}
 
-		protected async Task<T> RequestCommandAsync<T>(string body = "", string token = "") where T : class
+		protected async Task<T> SendRequest<T>(string body = "", string token = "") where T : class
 		{
 			var request = CreateRequest(body, token);
 			var domain = "https://openapi.tuyaus.com";

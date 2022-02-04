@@ -26,7 +26,7 @@ namespace LocalTuyaToggle
 		private async Task<bool> CreateRequestAsync(string value, string token)
         {
 			var command = "{'commands':[{ 'code': 'switch_led', 'value': " + value + " }]}";
-			var response = await RequestCommandAsync<CommandResponse>(command, token);
+			var response = await SendRequest<CommandResponse>(command, token);
 			return response.success;
 		}
 	}

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
-using Android.Graphics.Drawables;
 using Android.Service.QuickSettings;
 
 namespace LocalTuyaToggle
@@ -29,6 +28,7 @@ namespace LocalTuyaToggle
                 await TurnOnDeviceAsync();
                 return;
             }
+            SetSubtitle("");
         }
 
         private async Task TurnOffDeviceAsync()
@@ -75,7 +75,7 @@ namespace LocalTuyaToggle
             tile.UpdateTile();
         }
 
-        private void SetSubtitle(string str)
+        private void SetSubtitle(string str )
         {
             var tile = QsTile;
             tile.Subtitle = str;

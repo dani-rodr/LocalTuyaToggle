@@ -1,56 +1,53 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using RestSharp;
-using System.Text.Json;
 
 namespace LocalTuyaToggle
 {
-    public class TokenRequest
+    public class TokenRequest : BaseDeviceRequest
 	{
-		private readonly string _clientId;
-		private readonly string _secret;
-		public string Token { get; private set; }
 		public TokenRequest(string clientId, string secret)
+							: base(clientId, secret, "", Method.Get, "/v1.0/token?grant_type=1")
 		{
-			_clientId = clientId;
-			_secret = secret;
 		}
 
-		public async Task<Response> RequestToken()
-		{
-			var timestamp = Helper.TimeStamp;
-			var message = _clientId + timestamp + GetStringToSign();
-			var sign = Helper.Encrypt(message, _secret);
-			var request = CreateRequest(sign, timestamp);
-			var client = new RestClient("https://openapi.tuyaus.com/v1.0/token?grant_type=1");
-			var response = await client.ExecuteAsync(request);
+		public async Task<string> GetToken()
+        {
+			var response = await RequestCommandAsync<TokenResponse>();
+			if (!response.success)
+            {
+				Console.WriteLine($"Failed Token Request msg:{response.msg}");
+				return "";
+            }
 
-			return await JsonSerializer.DeserializeAsync<Response>(response.Content.ToStream());
-		}
+			return response.result.access_token;
+        }
 
-		private RestRequest CreateRequest(string sign, string timestamp)
+		protected override void FillRequestHeader(RestRequest request, string body, string timestamp, string sign)
 		{
-			var request = new RestRequest();
 			request.AddHeader("client_id", _clientId);
 			request.AddHeader("sign", sign);
 			request.AddHeader("t", timestamp);
 			request.AddHeader("sign_method", "HMAC-SHA256");
-			request.AddHeader("nonce", "");
-			request.AddHeader("stringToSign", "");
+            request.AddHeader("nonce", "");
+            request.AddHeader("stringToSign", "");
+        }
+	}
 
-			return request;
-		}
+	public class TokenResult
+	{
+		public string access_token { get; set; }
+		public int expire_time { get; set; }
+		public string refresh_token { get; set; }
+		public string uid { get; set; }
+	}
 
-		private string GetStringToSign()
-		{
-			var httpMethod = "GET";
-			var contentSHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"; // sha256 of empty body
-			var url = "/v1.0/token?grant_type=1";
-			var stringToSign = httpMethod + "\n" +
-							   contentSHA256 + "\n" +
-											   "\n" +
-							   url;
-			return stringToSign;
-		}
-
+	public class TokenResponse
+	{
+		public int code { get; set; }
+		public string msg { get; set; }
+		public TokenResult result { get; set; }
+		public bool success { get; set; }
+		public long t { get; set; }
 	}
 }

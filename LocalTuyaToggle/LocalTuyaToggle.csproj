@@ -66,10 +66,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ToggleService.cs" />
     <Compile Include="TokenRequest.cs" />
-    <Compile Include="Message.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ServiceRequest.cs" />
     <Compile Include="ServiceRequestStatus.cs" />
+    <Compile Include="BaseDeviceRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

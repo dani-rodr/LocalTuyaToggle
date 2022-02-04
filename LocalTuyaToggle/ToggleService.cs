@@ -25,29 +25,25 @@ namespace LocalTuyaToggle
         public async override void OnStartListening()
         {
             base.OnStartListening();
-            var tile = QsTile;
-            if (!string.IsNullOrEmpty(_token))
-            {
-                //await SetTileState();
-                return;
-            }
-            //tile.State = TileState.Unavailable;
-            //tile.UpdateTile();
             var tokenRequest = new TokenRequest(_clientId, _secret);
-            var response = await tokenRequest.RequestToken();
-            if (!response.success)
-            {   
-                Console.WriteLine($"{response.msg}");
-                return;
-            }
-            _token = response.result.access_token;
-            await SetTileState();
+            _token = await tokenRequest.GetToken();
+            await SetTileCurrentState();
         }
 
-        public async override void OnStopListening()
+        private async Task SetTileCurrentState()
         {
-            base.OnStopListening();
-            await SetTileState();
+            var tile = QsTile;
+            var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
+            var isOn = await deviceStatusRequest.IsOnAsync();
+            if (isOn && tile.State != TileState.Active)
+            {
+                tile.State = TileState.Active;
+            }
+            if (!isOn && tile.State != TileState.Inactive)
+            {
+                tile.State = TileState.Inactive;
+            }
+            tile.UpdateTile();
         }
 
         public async override void OnClick()
@@ -57,16 +53,16 @@ namespace LocalTuyaToggle
             var serviceRequest = new ServiceRequest(_clientId, _secret, _token, _deviceId);
             if (tile.State == TileState.Active)
             {
-                var response = await serviceRequest.RequestCommand("false");
-                if (response.success)
+                var success = await serviceRequest.TurnOffAsnyc();
+                if (success)
                 {
                     tile.State = TileState.Inactive;
                 }
             }
-            else
+            else if (tile.State == TileState.Inactive)
             {
-                var response = await serviceRequest.RequestCommand("true");
-                if (response.success)
+                var success = await serviceRequest.TurnOnAsync();
+                if (success)
                 {
                     tile.State = TileState.Active;
                 }
@@ -74,24 +70,10 @@ namespace LocalTuyaToggle
             tile.UpdateTile();
         }
 
-        private async Task SetTileState()
-        {
-            var tile = QsTile;
-            var isDeviceOn = await IsDeviceOn();
-            tile.State = (isDeviceOn) ? TileState.Active : TileState.Inactive;
-            tile.UpdateTile();
-        }
-
         private async Task<bool> IsDeviceOn()
         {
             var deviceStatusRequest = new ServiceRequestStatus(_clientId, _secret, _token, _deviceId);
-            var status = await deviceStatusRequest.RequestDeviceStatus();
-            if (!status.success)
-            {
-                return false;
-            }
-            var isOn = (JsonElement) status.result[0].value;
-            return isOn.GetBoolean();
+            return await deviceStatusRequest.IsOnAsync();
         }
     }
 

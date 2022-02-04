@@ -6,27 +6,27 @@ namespace LocalTuyaToggle
 {
     public class CommandRequest : BaseDeviceRequest
 	{
-		public CommandRequest(string clientId, string secret, string token, string deviceId)
-							: base(clientId, secret, token, Method.Post, $"/v1.0/devices/{deviceId}/commands")
+		public CommandRequest(string clientId, string secret, string deviceId)
+							: base(clientId, secret, Method.Post, $"/v1.0/devices/{deviceId}/commands")
 		{
 		}
 
-		public async Task<bool> TurnOnAsync()
+		public async Task<bool> TurnOnAsync(string token)
 		{
 			var value = "true";
-			return await CreateRequestAsync(value);
+			return await CreateRequestAsync(value, token);
 		}
 
-		public async Task<bool> TurnOffAsnyc()
+		public async Task<bool> TurnOffAsync(string token)
 		{
 			var value = "false";
-			return await CreateRequestAsync(value);
+			return await CreateRequestAsync(value, token);
 		}
 
-		private async Task<bool> CreateRequestAsync(string value)
+		private async Task<bool> CreateRequestAsync(string value, string token)
         {
 			var command = "{'commands':[{ 'code': 'switch_led', 'value': " + value + " }]}";
-			var response = await RequestCommandAsync<CommandResponse>(command);
+			var response = await RequestCommandAsync<CommandResponse>(command, token);
 			return response.success;
 		}
 	}

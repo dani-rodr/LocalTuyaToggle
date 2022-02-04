@@ -15,63 +15,49 @@ namespace LocalTuyaToggle
     [IntentFilter(new[] { ActionQsTile })]
     public class ToggleService : TileService
     {
-        private readonly string _clientId = "mgejajtfb8jp6120o6r4";
-        private readonly string _secret = "485d86f159c24281b77bec1a22e759bc";
-        private readonly string _deviceId = "82315003c44f33f81519";
-        private string _token = string.Empty;
+        private DeviceController _deviceController = new DeviceController();
         //Called each time tile is visible
         public async override void OnStartListening()
         {
             base.OnStartListening();
-            var tokenRequest = new TokenRequest(_clientId, _secret);
-            _token = await tokenRequest.GetToken();
-            await SetTileCurrentState();
-        }
+            var state = QsTile.State;
+            var isDeviceActive = await _deviceController.IsActiveAsync();
 
-        private async Task SetTileCurrentState()
-        {
-            var tile = QsTile;
-            var deviceStatusRequest = new StatusRequest(_clientId, _secret, _token, _deviceId);
-            var isOn = await deviceStatusRequest.IsOnAsync();
-            if (isOn && tile.State != TileState.Active)
+            if (isDeviceActive && state != TileState.Active)
             {
-                tile.State = TileState.Active;
+                ActivateTile();
             }
-            if (!isOn && tile.State != TileState.Inactive)
+            else if (!isDeviceActive && state != TileState.Inactive)
             {
-                tile.State = TileState.Inactive;
+                DeactivateTile();
             }
-            tile.UpdateTile();
         }
-
         public async override void OnClick()
         {
             base.OnClick();
+            var state = QsTile.State;
+            if (state == TileState.Active && await _deviceController.TurnOffAsync())
+            {
+                DeactivateTile();
+            }
+            else if (state == TileState.Inactive && await _deviceController.TurnOnAsync())
+            {
+                ActivateTile();
+            }
+        }
+
+        private void ActivateTile()
+        {
             var tile = QsTile;
-            var serviceRequest = new CommandRequest(_clientId, _secret, _token, _deviceId);
-            if (tile.State == TileState.Active)
-            {
-                var success = await serviceRequest.TurnOffAsnyc();
-                if (success)
-                {
-                    tile.State = TileState.Inactive;
-                }
-            }
-            else if (tile.State == TileState.Inactive)
-            {
-                var success = await serviceRequest.TurnOnAsync();
-                if (success)
-                {
-                    tile.State = TileState.Active;
-                }
-            }
+            tile.State = TileState.Active;
             tile.UpdateTile();
         }
 
-        private async Task<bool> IsDeviceOn()
+        private void DeactivateTile()
         {
-            var deviceStatusRequest = new StatusRequest(_clientId, _secret, _token, _deviceId);
-            return await deviceStatusRequest.IsOnAsync();
+            var tile = QsTile;
+            tile.State = TileState.Inactive;
+            tile.UpdateTile();
         }
     }
 

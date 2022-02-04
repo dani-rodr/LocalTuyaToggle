@@ -7,7 +7,7 @@ namespace LocalTuyaToggle
     public class TokenRequest : BaseDeviceRequest
 	{
 		public TokenRequest(string clientId, string secret)
-							: base(clientId, secret, "", Method.Get, "/v1.0/token?grant_type=1")
+							: base(clientId, secret, Method.Get, "/v1.0/token?grant_type=1")
 		{
 		}
 
@@ -23,7 +23,7 @@ namespace LocalTuyaToggle
 			return response.result.access_token;
         }
 
-		protected override void FillRequestHeader(RestRequest request, string body, string timestamp, string sign)
+		protected override void FillRequestHeader(RestRequest request, string body, string timestamp, string sign, string token)
 		{
 			request.AddHeader("client_id", _clientId);
 			request.AddHeader("sign", sign);

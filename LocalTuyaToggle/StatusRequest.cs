@@ -8,14 +8,14 @@ namespace LocalTuyaToggle
 {
     public class StatusRequest : BaseDeviceRequest
 	{
-		public StatusRequest(string clientId, string secret, string token, string deviceId)
-								: base(clientId, secret, token, Method.Get, $"/v1.0/devices/{deviceId}/status")
+		public StatusRequest(string clientId, string secret, string deviceId)
+								: base(clientId, secret, Method.Get, $"/v1.0/devices/{deviceId}/status")
 		{
 		}
 
-		public async Task<bool> IsOnAsync()
+		public async Task<bool> IsOnAsync(string token)
 		{
-			var response = await RequestCommandAsync<StatusResponse>();
+			var response = await RequestCommandAsync<StatusResponse>(token: token);
 			if (!response.success)
             {
 				return false;

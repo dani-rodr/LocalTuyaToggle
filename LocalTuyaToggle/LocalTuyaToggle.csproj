@@ -68,8 +68,9 @@
     <Compile Include="TokenRequest.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="CommandRequest.cs" />
-    <Compile Include="ServiceRequestStatus.cs" />
+    <Compile Include="StatusRequest.cs" />
     <Compile Include="BaseDeviceRequest.cs" />
+    <Compile Include="DeviceController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

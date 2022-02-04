@@ -28,15 +28,15 @@ namespace LocalTuyaToggle
             var tile = QsTile;
             if (!string.IsNullOrEmpty(_token))
             {
-                await SetTileState();
+                //await SetTileState();
                 return;
             }
+            //tile.State = TileState.Unavailable;
+            //tile.UpdateTile();
             var tokenRequest = new TokenRequest(_clientId, _secret);
             var response = await tokenRequest.RequestToken();
             if (!response.success)
-            {
-                tile.State = TileState.Unavailable;
-                tile.UpdateTile();
+            {   
                 Console.WriteLine($"{response.msg}");
                 return;
             }
@@ -57,13 +57,19 @@ namespace LocalTuyaToggle
             var serviceRequest = new ServiceRequest(_clientId, _secret, _token, _deviceId);
             if (tile.State == TileState.Active)
             {
-                await serviceRequest.RequestService("false");
-                tile.State = TileState.Inactive;
+                var response = await serviceRequest.RequestCommand("false");
+                if (response.success)
+                {
+                    tile.State = TileState.Inactive;
+                }
             }
             else
             {
-                await serviceRequest.RequestService("true");
-                tile.State = TileState.Active;
+                var response = await serviceRequest.RequestCommand("true");
+                if (response.success)
+                {
+                    tile.State = TileState.Active;
+                }
             }
             tile.UpdateTile();
         }

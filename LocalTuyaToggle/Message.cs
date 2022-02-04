@@ -19,6 +19,13 @@ namespace LocalTuyaToggle
         public long t { get; set; }
     }
 
+    public class CommandResponse
+    {
+        public bool result { get; set; }
+        public bool success { get; set; }
+        public long t { get; set; }
+    }
+
     public class KeyValuePair
     {
         public string code { get; set; }

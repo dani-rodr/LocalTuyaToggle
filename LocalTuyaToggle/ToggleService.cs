@@ -8,7 +8,7 @@ namespace LocalTuyaToggle
     [Service(Name = "com.LocalTuyaToggle.ToggleService",
              Permission = Android.Manifest.Permission.BindQuickSettingsTile,
              Label = "Lights",
-             Icon = "@mipmap/ic_launcher")]
+             Icon = "@mipmap/light_toggle")]
     [IntentFilter(new[] { ActionQsTile })]
     public class ToggleService : TileService
     {
